@@ -23,7 +23,7 @@ class _MainPageState extends State<MainPage> {
   };
 
   late MapEntry<String, double> ratio;
-  String? style;
+  ModelStyle? style;
 
   static const double padding = 22;
 
@@ -45,6 +45,7 @@ class _MainPageState extends State<MainPage> {
           hideLoading();
           setState(() {
             this.styles = styles;
+            style = this.styles.first;
           });
         },
         (error) {
@@ -94,6 +95,10 @@ class _MainPageState extends State<MainPage> {
 
   void hideLoading(){
     Navigator.pop(context);
+  }
+
+  Future<void> pressButtonGenerate() async {
+
   }
 
   @override
@@ -155,19 +160,19 @@ class _MainPageState extends State<MainPage> {
                   Expanded(
                     child: Align(
                       alignment: Alignment.centerRight,
-                      child: Text((style != null) ? style! : "")
+                      child: Text((style != null) ? style!.title : "")
                     )
                   ),
-                  PopupMenuButton<String>(
+                  PopupMenuButton<ModelStyle>(
                     padding: EdgeInsets.zero,
-                    onSelected: (String style){
+                    onSelected: (ModelStyle style){
                       setState(() {
                         this.style = style;
                       });
                     },
                     itemBuilder: (context) => styles.map(
-                      (e) => PopupMenuItem<String>(
-                        value: e.name,
+                      (e) => PopupMenuItem<ModelStyle>(
+                        value: e,
                         child: Text(e.title),
                       ),
                     ).toList())
@@ -198,9 +203,7 @@ class _MainPageState extends State<MainPage> {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed: (){
-
-                  },
+                  onPressed: pressButtonGenerate,
                   style: FilledButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8)
