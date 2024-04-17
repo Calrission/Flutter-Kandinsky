@@ -155,7 +155,17 @@ class _MainPageState extends State<MainPage> {
           padding: const EdgeInsets.symmetric(horizontal: padding),
           child: Column(
             children: [
-              const SizedBox(height: 78),
+              const SizedBox(height: 48),
+              (modelAI == null)
+                ? const SizedBox()
+                : Text(
+                  "${modelAI!.name} v${modelAI!.version}",
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  )
+              ),
+              const SizedBox(height: 28),
               Center(
                 child: SizedBox(
                   width: widthImage,
@@ -236,7 +246,7 @@ class _MainPageState extends State<MainPage> {
               TextField(
                 controller: negativePromtTextController,
                 decoration: const InputDecoration(
-                    hintText: "Негативный промт",
+                    hintText: "Негативный промт (опционально)",
                     hintStyle: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.normal
