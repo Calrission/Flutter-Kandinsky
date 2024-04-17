@@ -28,6 +28,7 @@ class _MainPageState extends State<MainPage> {
   ModelAI? modelAI;
 
   static const double padding = 22;
+  double widthImage = 0;
 
   var promtTextController = TextEditingController();
   var negativePromtTextController = TextEditingController();
@@ -113,12 +114,40 @@ class _MainPageState extends State<MainPage> {
   }
 
   Future<void> pressButtonGenerate() async {
+    showLoading();
+    useCase.pressGenerate(
+      widthImage,
+      ratio.value,
+      promtTextController.text,
+      negativePromtTextController.text,
+      modelAI,
+      style,
+      onInitGenerate: (id) {
 
+      },
+      onProcessingGenerate: (id){
+
+      },
+      onDoneGenerate: (image){
+
+      },
+      onFailGenerate: (error) {
+        showError(error);
+        hideLoading();
+      },
+      onCensured: (_) {
+
+      },
+      onError: (error) {
+        showError(error);
+        hideLoading();
+      }
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    var widthImage = MediaQuery.of(context).size.width - padding * 2;
+    widthImage = MediaQuery.of(context).size.width - padding * 2;
     var theme = Theme.of(context);
     return Scaffold(
       body: SingleChildScrollView(

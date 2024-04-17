@@ -1,9 +1,18 @@
 import 'package:dio/dio.dart';
 import 'package:kandinsky_flutter/data/models/model_ai.dart';
+import 'package:kandinsky_flutter/data/models/model_generate_request.dart';
+import 'package:kandinsky_flutter/data/models/model_generation.dart';
 import 'package:kandinsky_flutter/data/models/model_style.dart';
 
 final dio = Dio();
 
+var codeToDescription = {
+  401: "Ошибка авторизации",
+  404: "Ресурс не найден",
+  400: "Неверные параметры запроса или текстовое описание слишком длинное",
+  500: "Ошибка сервера при выполнении запроса",
+  415 : "Формат содержимого не поддерживается сервером"
+};
 
 Future<void> tryOnCatch(
   Future<void> Function() func,
@@ -13,10 +22,17 @@ Future<void> tryOnCatch(
     await func();
   } on DioException catch (e){
     if (e.response != null) {
-      onError(
+      if (e.response!.statusCode != null && codeToDescription.containsKey(e.response!.statusCode!)){
+        onError(
+          "STATUS: ${e.response?.statusCode}\n"
+          "MESSAGE: ${codeToDescription[e.response?.statusCode!]}"
+        );
+      }else{
+        onError(
           "STATUS: ${e.response?.statusCode}\n"
           "MESSAGE: ${e.response?.statusMessage}"
-      );
+        );
+      }
     } else {
       onError("Ошибка при отправке запроса");
     }
@@ -61,4 +77,28 @@ Future<void> requestGetIdModelsAI(
     },
     onError
   );
+}
+
+Future<void> startGenerate(
+    ModelGenerateRequest modelGenerateRequest,
+    Function(String uuid) onInitGenerate,
+    Function(String error) onError
+) async {
+
+}
+
+Future<void> checkGenerate(
+  String uuid,
+  Function(String status) onCheckStatus,
+  Function(String error) onError
+) async {
+
+}
+
+Future<void> fetchGenerate(
+  String uuid,
+  Function(ModelGeneration) onFetch,
+  Function(String) onError
+) async {
+
 }

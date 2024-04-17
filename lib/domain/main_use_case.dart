@@ -6,13 +6,28 @@ import 'package:kandinsky_flutter/data/repository/requests.dart';
 
 class MainUseCase {
   bool validData(
+    double imageWidth,
     String promt,
+    ModelStyle? style,
+    ModelAI? modelAI,
     {
       required Function(String) onNotValid
     }
   ){
+    if (imageWidth == 0){
+      onNotValid("Ошибка в определении ширины экрана, повторите попытку позже!");
+      return false;
+    }
     if (promt.isEmpty){
       onNotValid("Введите промт!");
+      return false;
+    }
+    if (style == null){
+      onNotValid("Выберите стиль!");
+      return false;
+    }
+    if (modelAI == null){
+      onNotValid("Выберите AI!");
       return false;
     }
     return true;
@@ -23,11 +38,15 @@ class MainUseCase {
     double ratio,
     String promt,
     String negativePromt,
-    String style,
-    Function(Uint8List) onGenerate,
-    Function(String) onError
-  ) async {
-    bool isValid = validData(promt, onNotValid: onError);
+    ModelAI? modelAI,
+    ModelStyle? style,
+      {required Function(String uuid) onInitGenerate,
+      required Function(String uuid) onProcessingGenerate,
+      required Function(Uint8List bytes) onDoneGenerate,
+      required Function(String error) onFailGenerate,
+      required Function(String uuid) onCensured,
+      required Function(String error) onError}) async {
+    bool isValid = validData(imageWidth, promt, style, modelAI, onNotValid: onError);
     if (!isValid){
       return;
     }
