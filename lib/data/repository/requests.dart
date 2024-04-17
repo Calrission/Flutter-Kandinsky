@@ -4,6 +4,8 @@ import 'package:kandinsky_flutter/data/models/model_generate_request.dart';
 import 'package:kandinsky_flutter/data/models/model_generation.dart';
 import 'package:kandinsky_flutter/data/models/model_style.dart';
 
+import 'env_keys.dart';
+
 final dio = Dio();
 
 var codeToDescription = {
@@ -21,19 +23,20 @@ Future<void> tryOnCatch(
   try{
     await func();
   } on DioException catch (e){
+    var code = e.response!.statusCode;
     if (e.response != null) {
-      if (e.response!.statusCode != null && codeToDescription.containsKey(e.response!.statusCode!)){
-        onError(codeToDescription[e.response!.statusCode!]!);
+      if (e.response!.statusCode != null && codeToDescription.containsKey(code)){
+        onError(codeToDescription[code]!);
       }else{
         onError(
-          "STATUS: ${e.response?.statusCode}\n"
+          "STATUS: $code\n"
           "MESSAGE: ${e.response?.statusMessage}"
         );
       }
     } else {
       onError("Ошибка при отправке запроса");
     }
-  } on Exception catch (e) {
+  } catch (e) {
     onError(e.toString());
   }
 }
@@ -62,7 +65,10 @@ Future<void> requestGetIdModelsAI(
   tryOnCatch(
     () async {
       Response response = await dio.get(
-          "https://api-key.fusionbrain.ai/key/api/v1/models"
+          "https://api-key.fusionbrain.ai/key/api/v1/models",
+        options: Options(
+          headers: fetchHeadersTokens()
+        )
       );
       List<dynamic> data = response.data;
       var result = data.map((e) => ModelAI.fromJson(e)).toList();

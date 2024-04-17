@@ -15,7 +15,7 @@ class ModelAI {
     String name;
     int id;
     String type;
-    int version;
+    double version;
 
     factory ModelAI.fromJson(Map<dynamic, dynamic> json) => ModelAI(
         name: json["name"],

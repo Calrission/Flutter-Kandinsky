@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:kandinsky_flutter/presentation/main_page.dart';
+import 'package:env_flutter/env_flutter.dart';
 
-void main() {
+void main() async {
+  await dotenv.load(fileNames: ["assets/key.env"]);
   runApp(const MyApp());
 }
 
