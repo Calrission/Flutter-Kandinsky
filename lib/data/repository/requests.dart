@@ -23,10 +23,7 @@ Future<void> tryOnCatch(
   } on DioException catch (e){
     if (e.response != null) {
       if (e.response!.statusCode != null && codeToDescription.containsKey(e.response!.statusCode!)){
-        onError(
-          "STATUS: ${e.response?.statusCode}\n"
-          "MESSAGE: ${codeToDescription[e.response?.statusCode!]}"
-        );
+        onError(codeToDescription[e.response!.statusCode!]!);
       }else{
         onError(
           "STATUS: ${e.response?.statusCode}\n"
@@ -92,7 +89,16 @@ Future<void> checkGenerate(
   Function(String status) onCheckStatus,
   Function(String error) onError
 ) async {
-
+  tryOnCatch(
+    () async {
+      Response response = await dio.get(
+          "https://api-key.fusionbrain.ai//key/api/v1/text2image/status/$uuid"
+      );
+      Map<String, dynamic> data = response.data;
+      onCheckStatus(data["status"]);
+    },
+    onError
+  );
 }
 
 Future<void> fetchGenerate(
