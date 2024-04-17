@@ -10,7 +10,6 @@ class ModelGenerateRequest {
         required this.width,
         required this.negativePromptUnclip,
         required this.style,
-        required this.type,
         required this.numImages,
         required this.height,
     });
@@ -19,7 +18,6 @@ class ModelGenerateRequest {
     int width;
     String negativePromptUnclip;
     String style;
-    String type;
     int numImages;
     int height;
 
@@ -28,7 +26,6 @@ class ModelGenerateRequest {
         width: json["width"],
         negativePromptUnclip: json["negativePromptUnclip"],
         style: json["style"],
-        type: json["type"],
         numImages: json["num_images"],
         height: json["height"],
     );
@@ -38,7 +35,7 @@ class ModelGenerateRequest {
         "width": width,
         "negativePromptUnclip": negativePromptUnclip,
         "style": style,
-        "type": type,
+        "type": "GENERATE",
         "num_images": numImages,
         "height": height,
     };

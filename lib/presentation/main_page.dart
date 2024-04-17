@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:kandinsky_flutter/data/models/model_ai.dart';
 import 'package:kandinsky_flutter/data/models/model_style.dart';
 import 'package:kandinsky_flutter/domain/main_use_case.dart';
 
@@ -24,6 +25,7 @@ class _MainPageState extends State<MainPage> {
 
   late MapEntry<String, double> ratio;
   ModelStyle? style;
+  ModelAI? modelAI;
 
   static const double padding = 22;
 
@@ -40,12 +42,25 @@ class _MainPageState extends State<MainPage> {
     ratio = rations.entries.first;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       showLoading();
-      useCase.getStyles(
+
+      await useCase.getStyles(
         (styles) {
-          hideLoading();
           setState(() {
             this.styles = styles;
             style = this.styles.first;
+          });
+        },
+        (error) {
+          hideLoading();
+          showError(error);
+        }
+      );
+
+      await useCase.getModelAI(
+        (model) {
+          setState(() {
+            modelAI = model;
+            hideLoading();
           });
         },
         (error) {
