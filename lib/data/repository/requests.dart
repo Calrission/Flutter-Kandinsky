@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:kandinsky_flutter/data/models/model_ai.dart';
+import 'package:kandinsky_flutter/data/models/model_error.dart';
 import 'package:kandinsky_flutter/data/models/model_generate_request.dart';
 import 'package:kandinsky_flutter/data/models/model_generation.dart';
 import 'package:kandinsky_flutter/data/models/model_style.dart';
@@ -23,19 +26,28 @@ Future<void> tryOnCatch(
   try{
     await func();
   } on DioException catch (e){
-    var code = e.response!.statusCode;
-    if (e.response != null) {
-      if (e.response!.statusCode != null && codeToDescription.containsKey(code)){
-        onError(codeToDescription[code]!);
-      }else{
-        onError(
-          "STATUS: $code\n"
-          "MESSAGE: ${e.response?.statusMessage}"
-        );
+
+    try{
+      if (e.response?.data != null){
+        var modelError = ModelError.fromJson(e.response!.data!);
+        onError(modelError.message);
       }
-    } else {
-      onError("Ошибка при отправке запроса");
+    }catch(_){
+      var code = e.response?.statusCode;
+      if (e.response != null) {
+        if (e.response!.statusCode != null && codeToDescription.containsKey(code)){
+          onError(codeToDescription[code]!);
+        }else{
+          onError(
+              "STATUS: $code\n"
+              "MESSAGE: ${e.response?.statusMessage}"
+          );
+        }
+      } else {
+        onError("Ошибка при отправке запроса");
+      }
     }
+
   } catch (e) {
     onError(e.toString());
   }
@@ -45,7 +57,7 @@ Future<void> requestLoadStyle(
   Function(List<ModelStyle>) onResponse,
   Function(String) onError
 ) async {
-  tryOnCatch(
+  await tryOnCatch(
     () async {
       Response response = await dio.get(
           "https://cdn.fusionbrain.ai/static/styles/api"
@@ -62,7 +74,7 @@ Future<void> requestGetIdModelsAI(
   Function(List<ModelAI>) onResponse,
   Function(String) onError
 ) async {
-  tryOnCatch(
+  await tryOnCatch(
     () async {
       Response response = await dio.get(
         "https://api-key.fusionbrain.ai/key/api/v1/models",
@@ -85,20 +97,23 @@ Future<void> requestGetIdModelsAI(
 Future<void> startGenerate(
     ModelGenerateRequest modelGenerateRequest,
     ModelAI modelAI,
-    Function(String uuid) onInitGenerate,
-    Function(String error) onError
+    {
+      required Function(String uuid) onInitGenerate,
+      required Function(String error) onError
+    }
 ) async {
-  tryOnCatch(
+  await tryOnCatch(
     () async {
       var formData = FormData.fromMap(
         {
           "model_id": modelAI.id,
-          "params": modelGenerateRequest.toJson()
+          "params": jsonEncode(modelGenerateRequest.toJson())
         }
       );
       Response response = await dio.post(
         "https://api-key.fusionbrain.ai/key/api/v1/text2image/run",
         options: Options(
+          contentType: Headers.jsonContentType,
           headers: fetchHeadersTokens()
         ),
         data: formData
@@ -112,9 +127,11 @@ Future<void> startGenerate(
 
 Future<void> checkGenerate(
   String uuid,
-  Function(ModelGeneration) onDone,
-  Function(String status) onCheckStatus,
-  Function(String error) onError
+  {
+    required Function(ModelGeneration) onDone,
+    required Function(String status) onCheckStatus,
+    required Function(String error) onError
+  }
 ) async {
   tryOnCatch(
     () async {
@@ -130,6 +147,10 @@ Future<void> checkGenerate(
         case "FAIL":
           onError(model.errorDescription ?? "Ошибка генерации");
         case "DONE":
+          if (model.images?.isEmpty ?? true){
+            onError("Ошибка получения изображения(ий)");
+            return;
+          }
           onDone(model);
       }
     },

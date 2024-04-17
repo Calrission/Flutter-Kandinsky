@@ -13,6 +13,8 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
 
+  final GlobalKey _dialogKey = GlobalKey();
+
   Uint8List? image;
 
   Map<String, double> rations = {
@@ -95,6 +97,7 @@ class _MainPageState extends State<MainPage> {
         return PopScope(
           canPop: false,
           child: Dialog(
+            key: _dialogKey,
             surfaceTintColor: Colors.transparent,
             backgroundColor: Colors.transparent,
             child: Center(
@@ -110,11 +113,12 @@ class _MainPageState extends State<MainPage> {
   }
 
   void hideLoading(){
-    Navigator.pop(context);
+    if (_dialogKey.currentContext != null) {
+      Navigator.pop(context);
+    }
   }
 
   Future<void> pressButtonGenerate() async {
-    showLoading();
     useCase.pressGenerate(
       widthImage,
       ratio.value,
@@ -122,25 +126,21 @@ class _MainPageState extends State<MainPage> {
       negativePromtTextController.text,
       modelAI,
       style,
-      onInitGenerate: (id) {
-
+      onInit: (id){
+        showLoading();
       },
-      onProcessingGenerate: (id){
-
+      onCheckStatus: (status) {
+        hideLoading();
       },
-      onDoneGenerate: (image){
-
-      },
-      onFailGenerate: (error) {
-        showError(error);
+      onDone: (image){
         hideLoading();
       },
       onCensured: (_) {
-
+        hideLoading();
       },
       onError: (error) {
-        showError(error);
         hideLoading();
+        showError(error);
       }
     );
   }
