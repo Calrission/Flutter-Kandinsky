@@ -165,7 +165,7 @@ class _MainPageState extends State<MainPage> {
                     fontWeight: FontWeight.bold,
                   )
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 18),
               Center(
                 child: SizedBox(
                   width: widthImage,
@@ -234,6 +234,8 @@ class _MainPageState extends State<MainPage> {
               ),
               TextField(
                 controller: promtTextController,
+                maxLength: 1000,
+                maxLines: null,
                 decoration: const InputDecoration(
                   hintText: "Промт",
                   hintStyle: TextStyle(
@@ -245,12 +247,14 @@ class _MainPageState extends State<MainPage> {
               const SizedBox(height: 16),
               TextField(
                 controller: negativePromtTextController,
+                maxLength: 1000,
+                maxLines: null,
                 decoration: const InputDecoration(
-                    hintText: "Негативный промт (опционально)",
-                    hintStyle: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.normal
-                    )
+                  hintText: "Негативный промт (опционально)",
+                  hintStyle: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.normal
+                  )
                 ),
               ),
               const SizedBox(height: 28),
