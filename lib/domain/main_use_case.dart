@@ -40,12 +40,15 @@ class MainUseCase {
     String negativePromt,
     ModelAI? modelAI,
     ModelStyle? style,
-      {required Function(String uuid) onInitGenerate,
+    {
+      required Function(String uuid) onInitGenerate,
       required Function(String uuid) onProcessingGenerate,
       required Function(Uint8List bytes) onDoneGenerate,
       required Function(String error) onFailGenerate,
       required Function(String uuid) onCensured,
-      required Function(String error) onError}) async {
+      required Function(String error) onError
+    }
+  ) async {
     bool isValid = validData(imageWidth, promt, style, modelAI, onNotValid: onError);
     if (!isValid){
       return;

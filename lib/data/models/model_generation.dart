@@ -13,10 +13,10 @@ class ModelGeneration {
         required this.status,
     });
 
-    List<String> images;
-    String errorDescription;
+    List<String>? images;
+    String? errorDescription;
     String uuid;
-    String censored;
+    bool? censored;
     String status;
 
     factory ModelGeneration.fromJson(Map<dynamic, dynamic> json) => ModelGeneration(
@@ -28,7 +28,7 @@ class ModelGeneration {
     );
 
     Map<dynamic, dynamic> toJson() => {
-        "images": List<dynamic>.from(images.map((x) => x)),
+        "images": List<dynamic>.from(images?.map((x) => x) ?? []),
         "errorDescription": errorDescription,
         "uuid": uuid,
         "censored": censored,

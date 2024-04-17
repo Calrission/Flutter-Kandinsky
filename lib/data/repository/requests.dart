@@ -65,7 +65,7 @@ Future<void> requestGetIdModelsAI(
   tryOnCatch(
     () async {
       Response response = await dio.get(
-          "https://api-key.fusionbrain.ai/key/api/v1/models",
+        "https://api-key.fusionbrain.ai/key/api/v1/models",
         options: Options(
           headers: fetchHeadersTokens()
         )
@@ -84,33 +84,55 @@ Future<void> requestGetIdModelsAI(
 
 Future<void> startGenerate(
     ModelGenerateRequest modelGenerateRequest,
+    ModelAI modelAI,
     Function(String uuid) onInitGenerate,
     Function(String error) onError
 ) async {
-
+  tryOnCatch(
+    () async {
+      var formData = FormData.fromMap(
+        {
+          "model_id": modelAI.id,
+          "params": modelGenerateRequest.toJson()
+        }
+      );
+      Response response = await dio.post(
+        "https://api-key.fusionbrain.ai/key/api/v1/text2image/run",
+        options: Options(
+          headers: fetchHeadersTokens()
+        ),
+        data: formData
+      );
+      Map<String, dynamic> data = response.data;
+      onInitGenerate(data["uuid"]);
+    },
+    onError
+  );
 }
 
 Future<void> checkGenerate(
   String uuid,
+  Function(ModelGeneration) onDone,
   Function(String status) onCheckStatus,
   Function(String error) onError
 ) async {
   tryOnCatch(
     () async {
       Response response = await dio.get(
-          "https://api-key.fusionbrain.ai//key/api/v1/text2image/status/$uuid"
+          "https://api-key.fusionbrain.ai/key/api/v1/text2image/status/$uuid"
       );
       Map<String, dynamic> data = response.data;
-      onCheckStatus(data["status"]);
+      var model = ModelGeneration.fromJson(data);
+      switch (model.status) {
+        case "INITIAL":
+        case "PROCESSING":
+          onCheckStatus(model.status);
+        case "FAIL":
+          onError(model.errorDescription ?? "Ошибка генерации");
+        case "DONE":
+          onDone(model);
+      }
     },
     onError
   );
-}
-
-Future<void> fetchGenerate(
-  String uuid,
-  Function(ModelGeneration) onFetch,
-  Function(String) onError
-) async {
-
 }
