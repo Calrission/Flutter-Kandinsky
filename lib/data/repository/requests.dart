@@ -38,15 +38,14 @@ Future<void> tryOnCatch(
           onError(codeToDescription[code]!);
         }else{
           onError(
-              "STATUS: $code\n"
-              "MESSAGE: ${e.response?.statusMessage}"
+            "STATUS: $code\n"
+            "MESSAGE: ${e.response?.statusMessage}"
           );
         }
       } else {
         onError("Ошибка при отправке запроса");
       }
     }
-
   } catch (e) {
     onError(e.toString());
   }

@@ -20,7 +20,7 @@ class ModelGeneration {
     String status;
 
     factory ModelGeneration.fromJson(Map<dynamic, dynamic> json) => ModelGeneration(
-        images: List<String>.from(json["images"].map((x) => x)),
+        images: (json["images"] != null) ? List<String>.from(json["images"] as List) : null,
         errorDescription: json["errorDescription"],
         uuid: json["uuid"],
         censored: json["censored"],
