@@ -11,6 +11,7 @@ dependencies:
     sdk: flutter
 
   dio: ^5.4.3+1
+  flutter_svg: ^2.0.10+1
   env_flutter: ^0.1.4
   cupertino_icons: ^1.0.6
 

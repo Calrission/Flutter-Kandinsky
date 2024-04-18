@@ -92,6 +92,10 @@ class MainUseCase {
         id,
         onDone: (ModelGeneration model){
           var bytes = base64Decode(model.images!.first);
+          if (model.censored ?? false){
+            onCensured(id);
+            return;
+          }
           onDone(bytes);
         },
         onCheckStatus: (status){

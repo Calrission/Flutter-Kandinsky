@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:kandinsky_flutter/data/models/model_ai.dart';
 import 'package:kandinsky_flutter/data/models/model_style.dart';
 import 'package:kandinsky_flutter/domain/main_use_case.dart';
@@ -36,6 +37,7 @@ class _MainPageState extends State<MainPage> {
   var negativePromtTextController = TextEditingController();
 
   List<ModelStyle> styles = [];
+  bool isCensured = false;
 
   MainUseCase useCase = MainUseCase();
 
@@ -127,18 +129,25 @@ class _MainPageState extends State<MainPage> {
       modelAI,
       style,
       onInit: (id){
+        setState(() {
+          isCensured = false;
+          image = null;
+        });
         showLoading();
       },
       onCheckStatus: (status) {
-        hideLoading();
+
       },
       onDone: (image){
-        hideLoading();
         setState(() {
           this.image = image;
         });
+        hideLoading();
       },
       onCensured: (_) {
+        setState(() {
+          isCensured = true;
+        });
         hideLoading();
       },
       onError: (error) {
@@ -181,7 +190,18 @@ class _MainPageState extends State<MainPage> {
                         color: theme.colorScheme.primary,
                         child: (image != null)
                           ? Image.memory(image!)
-                          : const SizedBox()
+                          : (isCensured)
+                            ? Transform.scale(
+                              scale: 0.85,
+                              child: Transform.rotate(
+                                angle: 0.45,
+                                child: SvgPicture.asset(
+                                  "assets/censured.svg",
+                                  color: Colors.white
+                                ),
+                              ),
+                            )
+                            : const SizedBox()
                       ),
                     )
                   ),
