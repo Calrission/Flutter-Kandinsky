@@ -176,12 +176,13 @@ class _MainPageState extends State<MainPage> {
                     aspectRatio: ratio.value,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(32),
-                      child: (image != null)
-                        ? Image.memory(image!)
-                        : Container(
-                            width: double.infinity,
-                            color: theme.colorScheme.primary
-                          ),
+                      child: Container(
+                        width: double.infinity,
+                        color: theme.colorScheme.primary,
+                        child: (image != null)
+                          ? Image.memory(image!)
+                          : const SizedBox()
+                      ),
                     )
                   ),
                 ),
