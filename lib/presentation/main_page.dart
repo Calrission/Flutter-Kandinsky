@@ -134,6 +134,9 @@ class _MainPageState extends State<MainPage> {
       },
       onDone: (image){
         hideLoading();
+        setState(() {
+          this.image = image;
+        });
       },
       onCensured: (_) {
         hideLoading();

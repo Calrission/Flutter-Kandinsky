@@ -6,7 +6,7 @@ import 'package:kandinsky_flutter/data/models/model_error.dart';
 import 'package:kandinsky_flutter/data/models/model_generate_request.dart';
 import 'package:kandinsky_flutter/data/models/model_generation.dart';
 import 'package:kandinsky_flutter/data/models/model_style.dart';
-
+import 'package:http_parser/http_parser.dart';
 import 'env_keys.dart';
 
 final dio = Dio();
@@ -26,7 +26,6 @@ Future<void> tryOnCatch(
   try{
     await func();
   } on DioException catch (e){
-
     try{
       if (e.response?.data != null){
         var modelError = ModelError.fromJson(e.response!.data!);
@@ -104,21 +103,27 @@ Future<void> startGenerate(
 ) async {
   await tryOnCatch(
     () async {
+      var jsonParams = jsonEncode(modelGenerateRequest.toJson());
       var formData = FormData.fromMap(
         {
           "model_id": modelAI.id,
-          "params": jsonEncode(modelGenerateRequest.toJson())
-        }
+          "params": MultipartFile.fromString(
+              jsonParams,
+              contentType: MediaType("application", "json")
+          )
+        },
       );
+
       Response response = await dio.post(
         "https://api-key.fusionbrain.ai/key/api/v1/text2image/run",
         options: Options(
-          contentType: Headers.jsonContentType,
+          contentType: Headers.multipartFormDataContentType,
           headers: fetchHeadersTokens()
         ),
         data: formData
       );
       Map<String, dynamic> data = response.data;
+
       onInitGenerate(data["uuid"]);
     },
     onError
@@ -136,7 +141,10 @@ Future<void> checkGenerate(
   tryOnCatch(
     () async {
       Response response = await dio.get(
-          "https://api-key.fusionbrain.ai/key/api/v1/text2image/status/$uuid"
+        "https://api-key.fusionbrain.ai/key/api/v1/text2image/status/$uuid",
+        options: Options(
+          headers: fetchHeadersTokens()
+        ),
       );
       Map<String, dynamic> data = response.data;
       var model = ModelGeneration.fromJson(data);

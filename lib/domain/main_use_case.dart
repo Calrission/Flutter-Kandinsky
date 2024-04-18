@@ -82,10 +82,9 @@ class MainUseCase {
 
     onInit(id);
 
-    startTimer(Future<void> Function() func){
-      Timer.periodic(const Duration(milliseconds: 200), (timer) async {
-        await func();
-      });
+    startDelayed(Future<void> Function() func) async {
+      await Future.delayed(const Duration(seconds: 1));
+      await func();
     }
 
     Future<void> iterationCheck() async {
@@ -97,13 +96,13 @@ class MainUseCase {
         },
         onCheckStatus: (status){
           onCheckStatus(status);
-          startTimer(iterationCheck);
+          startDelayed(iterationCheck);
         },
         onError: onError
       );
     }
 
-    startTimer(iterationCheck);
+    startDelayed(iterationCheck);
   }
 
   Future<void> getStyles(
