@@ -67,7 +67,7 @@ class MainUseCase {
       numImages: 1,
     );
 
-    String id = "";
+    String? id;
 
     requestStartGeneration() async {
       await startGenerate(
@@ -75,20 +75,15 @@ class MainUseCase {
         modelAI!,
         onInitGenerate: (String uuid){
           id = uuid;
+          onInit(uuid);
         },
         onError: onError
       );
-
-      if (id == ""){
-        return;
-      }
-
-      onInit(id);
     }
 
     requestToListenStatusChanges() async {
       startListenCheckStatusGeneration(
-          id,
+          id!,
           onDone: onDone,
           onCensured: onCensured,
           onError: onError,
@@ -97,6 +92,11 @@ class MainUseCase {
     }
 
     await request(requestStartGeneration, onError);
+
+    if (id == null){
+      return;
+    }
+
     await request(requestToListenStatusChanges, onError);
   }
 
