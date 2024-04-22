@@ -90,7 +90,7 @@ Future<void> checkGenerate(
     case "PROCESSING":
       onCheckStatus(model.status);
     case "FAIL":
-      throw Exception(model.errorDescription ?? "Ошибка генерации");
+      throw MessageException(model.errorDescription ?? "Ошибка генерации");
     case "DONE":
       if (model.images?.isEmpty ?? true){
         throw const MessageException("Ошибка получения изображения(ий)");
