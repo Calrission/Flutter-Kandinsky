@@ -7,6 +7,7 @@ import 'package:kandinsky_flutter/data/models/model_generate_request.dart';
 import 'package:kandinsky_flutter/data/models/model_generation.dart';
 import 'package:kandinsky_flutter/data/models/model_style.dart';
 import 'package:kandinsky_flutter/data/repository/requests.dart';
+import 'package:kandinsky_flutter/domain/utils.dart';
 
 class MainUseCase {
   bool validData(
@@ -65,45 +66,74 @@ class MainUseCase {
       style: style!.name,
       numImages: 1,
     );
-    
-    String id = "";
-    await startGenerate(
-      modelGenerateRequest,
-      modelAI!,
-      onInitGenerate: (String uuid){
-        id = uuid;
-      },
-      onError: onError
-    );
 
-    if (id == ""){
-      return;
+    String id = "";
+
+    requestStartGeneration() async {
+      await startGenerate(
+        modelGenerateRequest,
+        modelAI!,
+        onInitGenerate: (String uuid){
+          id = uuid;
+        },
+        onError: onError
+      );
+
+      if (id == ""){
+        return;
+      }
+
+      onInit(id);
     }
 
-    onInit(id);
+    requestToListenStatusChanges() async {
+      startListenCheckStatusGeneration(
+          id,
+          onDone: onDone,
+          onCensured: onCensured,
+          onError: onError,
+          onCheckStatus: onCheckStatus
+      );
+    }
 
+    await request(requestStartGeneration, onError);
+    await request(requestToListenStatusChanges, onError);
+  }
+
+  Future<void> startListenCheckStatusGeneration(
+    String id,
+      {
+        required Function(String uuid) onCheckStatus,
+        required Function(Uint8List bytes) onDone,
+        required Function(String uuid) onCensured,
+        required Function(String error) onError
+      }
+  ) async {
     startDelayed(Future<void> Function() func) async {
       await Future.delayed(const Duration(seconds: 1));
       await func();
     }
 
     Future<void> iterationCheck() async {
-      await checkGenerate(
-        id,
-        onDone: (ModelGeneration model){
-          var bytes = base64Decode(model.images!.first);
-          if (model.censored ?? false){
-            onCensured(id);
-            return;
-          }
-          onDone(bytes);
-        },
-        onCheckStatus: (status){
-          onCheckStatus(status);
-          startDelayed(iterationCheck);
-        },
-        onError: onError
-      );
+      requestCheckGeneration() async {
+        await checkGenerate(
+            id,
+            onDone: (ModelGeneration model){
+              var bytes = base64Decode(model.images!.first);
+              if (model.censored ?? false){
+                onCensured(id);
+                return;
+              }
+              onDone(bytes);
+            },
+            onCheckStatus: (status){
+              onCheckStatus(status);
+              startDelayed(iterationCheck);
+            },
+            onError: onError
+        );
+      }
+      request(requestCheckGeneration, onError);
     }
 
     startDelayed(iterationCheck);
@@ -113,18 +143,25 @@ class MainUseCase {
     Function(List<ModelStyle>) onGenerate,
     Function(String) onError
   ) async {
-    await requestLoadStyle(onGenerate, onError);
+    requestFetchStyles() async {
+      await fetchStyles(onGenerate, onError);
+    }
+    request(requestFetchStyles, onError);
   }
 
   Future<void> getModelAI(
     Function(ModelAI) onResponse,
     Function(String) onError
   ) async {
-    await requestGetIdModelsAI(
-      (models){
-         onResponse(models.first);
-      },
-      onError
-    );
+    requestGetIdModelsAI() async {
+      await getIdModelsAI(
+              (models){
+            onResponse(models.first);
+          },
+          onError
+      );      
+    }
+    
+    await request(requestGetIdModelsAI, onError);
   }
 }
