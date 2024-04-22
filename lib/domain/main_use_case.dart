@@ -61,7 +61,7 @@ class MainUseCase {
     ModelGenerateRequest modelGenerateRequest = ModelGenerateRequest(
       generateParams: GenerateParams(query: promt),
       width: imageWidth.toInt(),
-      height: (imageWidth * ratio).toInt(),
+      height: imageWidth ~/ ratio,
       negativePromptUnclip: negativePromt,
       style: style!.name,
       numImages: 1,
