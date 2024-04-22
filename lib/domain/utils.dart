@@ -2,6 +2,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:kandinsky_flutter/data/models/model_error.dart';
+import 'package:kandinsky_flutter/domain/message_exception.dart';
 
 
 var codeToDescription = {
@@ -39,7 +40,9 @@ Future<void> request(
         onError("Ошибка при отправке запроса");
       }
     }
-  } catch (e) {
+  }on MessageException catch(e){
+   onError(e.message);
+  }catch (e) {
     onError(e.toString());
   }
 }

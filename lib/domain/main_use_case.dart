@@ -66,7 +66,6 @@ class MainUseCase {
       style: style!.name,
       numImages: 1,
     );
-
     String? id;
 
     requestStartGeneration() async {
@@ -76,11 +75,9 @@ class MainUseCase {
         onInitGenerate: (String uuid){
           id = uuid;
           onInit(uuid);
-        },
-        onError: onError
+        }
       );
     }
-
     requestToListenStatusChanges() async {
       startListenCheckStatusGeneration(
           id!,
@@ -92,11 +89,9 @@ class MainUseCase {
     }
 
     await request(requestStartGeneration, onError);
-
     if (id == null){
       return;
     }
-
     await request(requestToListenStatusChanges, onError);
   }
 
@@ -129,8 +124,7 @@ class MainUseCase {
             onCheckStatus: (status){
               onCheckStatus(status);
               startDelayed(iterationCheck);
-            },
-            onError: onError
+            }
         );
       }
       request(requestCheckGeneration, onError);
@@ -144,7 +138,7 @@ class MainUseCase {
     Function(String) onError
   ) async {
     requestFetchStyles() async {
-      await fetchStyles(onGenerate, onError);
+      await fetchStyles(onGenerate);
     }
     request(requestFetchStyles, onError);
   }
@@ -155,10 +149,9 @@ class MainUseCase {
   ) async {
     requestGetIdModelsAI() async {
       await getIdModelsAI(
-              (models){
-            onResponse(models.first);
-          },
-          onError
+        (models){
+          onResponse(models.first);
+        },
       );      
     }
     

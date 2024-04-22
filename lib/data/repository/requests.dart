@@ -2,18 +2,17 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:kandinsky_flutter/data/models/model_ai.dart';
-import 'package:kandinsky_flutter/data/models/model_error.dart';
 import 'package:kandinsky_flutter/data/models/model_generate_request.dart';
 import 'package:kandinsky_flutter/data/models/model_generation.dart';
 import 'package:kandinsky_flutter/data/models/model_style.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:kandinsky_flutter/domain/message_exception.dart';
 import 'env_keys.dart';
 
 final dio = Dio();
 
 Future<void> fetchStyles(
-  Function(List<ModelStyle>) onResponse,
-  Function(String) onError
+  Function(List<ModelStyle>) onResponse
 ) async {
   Response response = await dio.get(
       "https://cdn.fusionbrain.ai/static/styles/api"
@@ -24,8 +23,7 @@ Future<void> fetchStyles(
 }
 
 Future<void> getIdModelsAI(
-  Function(List<ModelAI>) onResponse,
-  Function(String) onError
+  Function(List<ModelAI>) onResponse
 ) async {
   Response response = await dio.get(
       "https://api-key.fusionbrain.ai/key/api/v1/models",
@@ -36,8 +34,7 @@ Future<void> getIdModelsAI(
   List<dynamic> data = response.data;
   var result = data.map((e) => ModelAI.fromJson(e)).toList();
   if (result.isEmpty){
-    onError("Модели AI не найдены");
-    return;
+    throw const MessageException("Модели AI не найдены");
   }
   onResponse(result);
 }
@@ -46,8 +43,7 @@ Future<void> startGenerate(
     ModelGenerateRequest modelGenerateRequest,
     ModelAI modelAI,
     {
-      required Function(String uuid) onInitGenerate,
-      required Function(String error) onError
+      required Function(String uuid) onInitGenerate
     }
 ) async {
   var jsonParams = jsonEncode(modelGenerateRequest.toJson());
@@ -78,8 +74,7 @@ Future<void> checkGenerate(
   String uuid,
   {
     required Function(ModelGeneration) onDone,
-    required Function(String status) onCheckStatus,
-    required Function(String error) onError
+    required Function(String status) onCheckStatus
   }
 ) async {
   Response response = await dio.get(
@@ -95,11 +90,10 @@ Future<void> checkGenerate(
     case "PROCESSING":
       onCheckStatus(model.status);
     case "FAIL":
-      onError(model.errorDescription ?? "Ошибка генерации");
+      throw Exception(model.errorDescription ?? "Ошибка генерации");
     case "DONE":
       if (model.images?.isEmpty ?? true){
-        onError("Ошибка получения изображения(ий)");
-        return;
+        throw const MessageException("Ошибка получения изображения(ий)");
       }
       onDone(model);
   }
