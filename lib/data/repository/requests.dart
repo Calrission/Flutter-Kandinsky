@@ -22,7 +22,7 @@ Future<void> fetchStyles(
   onResponse(result);
 }
 
-Future<void> getIdModelsAI(
+Future<void> getModelsAI(
   Function(List<ModelAI>) onResponse
 ) async {
   Response response = await dio.get(
@@ -60,8 +60,7 @@ Future<void> startGenerate(
   Response response = await dio.post(
       "https://api-key.fusionbrain.ai/key/api/v1/text2image/run",
       options: Options(
-          contentType: Headers.multipartFormDataContentType,
-          headers: fetchHeadersTokens()
+        headers: fetchHeadersTokens()
       ),
       data: formData
   );
@@ -83,8 +82,7 @@ Future<void> checkGenerate(
         headers: fetchHeadersTokens()
     ),
   );
-  Map<String, dynamic> data = response.data;
-  var model = ModelGeneration.fromJson(data);
+  var model = ModelGeneration.fromJson(response.data);
   switch (model.status) {
     case "INITIAL":
     case "PROCESSING":

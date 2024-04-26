@@ -97,12 +97,12 @@ class MainUseCase {
 
   Future<void> startListenCheckStatusGeneration(
     String id,
-      {
-        required Function(String uuid) onCheckStatus,
-        required Function(Uint8List bytes) onDone,
-        required Function(String uuid) onCensured,
-        required Function(String error) onError
-      }
+    {
+      required Function(String uuid) onCheckStatus,
+      required Function(Uint8List bytes) onDone,
+      required Function(String uuid) onCensured,
+      required Function(String error) onError
+    }
   ) async {
     startDelayed(Future<void> Function() func) async {
       await Future.delayed(const Duration(seconds: 1));
@@ -112,19 +112,19 @@ class MainUseCase {
     Future<void> iterationCheck() async {
       requestCheckGeneration() async {
         await checkGenerate(
-            id,
-            onDone: (ModelGeneration model){
-              var bytes = base64Decode(model.images!.first);
-              if (model.censored ?? false){
-                onCensured(id);
-                return;
-              }
-              onDone(bytes);
-            },
-            onCheckStatus: (status){
-              onCheckStatus(status);
-              startDelayed(iterationCheck);
+          id,
+          onDone: (ModelGeneration model){
+            var bytes = base64Decode(model.images!.first);
+            if (model.censored ?? false){
+              onCensured(id);
+              return;
             }
+            onDone(bytes);
+          },
+          onCheckStatus: (status){
+            onCheckStatus(status);
+            startDelayed(iterationCheck);
+          }
         );
       }
       request(requestCheckGeneration, onError);
@@ -148,7 +148,7 @@ class MainUseCase {
     Function(String) onError
   ) async {
     requestGetIdModelsAI() async {
-      await getIdModelsAI(
+      await getModelsAI(
         (models){
           onResponse(models.first);
         },

@@ -13,36 +13,43 @@ var codeToDescription = {
   415: "Формат содержимого не поддерживается сервером"
 };
 
-Future<void> request(
+Future<bool> request(
     Future<void> Function() func,
     Function(String) onError
-    ) async {
+) async {
   try{
     await func();
+    return true;
   } on DioException catch (e){
     try{
       if (e.response?.data != null){
         var modelError = ModelError.fromJson(e.response!.data!);
         onError(modelError.message);
       }
+      return false;
     }catch(_){
       var code = e.response?.statusCode;
       if (e.response != null) {
         if (e.response!.statusCode != null && codeToDescription.containsKey(code)){
           onError(codeToDescription[code]!);
+          return false;
         }else{
           onError(
               "STATUS: $code\n"
                   "MESSAGE: ${e.response?.statusMessage}"
           );
+          return false;
         }
       } else {
         onError("Ошибка при отправке запроса");
+        return false;
       }
     }
   }on MessageException catch(e){
-   onError(e.message);
+    onError(e.message);
+    return false;
   }catch (e) {
     onError(e.toString());
+    return false;
   }
 }
